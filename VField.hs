@@ -4,8 +4,25 @@ import VLine
 import VPoint(Point, Vector(Vector), isPara, isSameDirection, distance2)
 import qualified Data.Map as Map
 
--- フィールド。[すべての母点]と、その母店が持つ[ボロノイ線のリスト]を辞書として保持します。
-type VField d = Map.Map (Point d) [VLine d]
+data With x d = With x (Point d)
+-- 交点がある場合、Point dは交点。そうでなければ、線上のどこか。
+type Snip d = (Point d, Vector d)
+data VoronoiSnip d = SingleEdge (With (Snip d) d)
+	| DoubleEdge (With (Snip d) d) (With (Snip d) d)
+	| OpenBound [(With (Snip d) d)]
+	| ClosedBound [(With (Snip d) d)]
+
+
+-- フィールド。[すべての母点]と、その母点が持つ[ボロノイ線のリスト]を辞書として保持します。
+--type VField d = Map.Map (Point d) [VLine d]
+type VField d = Map.Map (Point d) (VoronoiSnip d)
+
+
+brushUpVLines' :: (Fractional d, Ord d, Eq d) => Point d -> VLine d -> VornoiSnip d -> (VoronoiSnip d, [Point d])
+
+
+
+
 -- (ある母点からみた)ボロノイ線です。[線]と[どの母点との間にある線なのか]をタプルで保持します。
 type VLine d = (Point d, Line d)
 

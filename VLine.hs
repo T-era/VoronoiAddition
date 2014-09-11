@@ -64,7 +64,7 @@ toF = toF'.imageInf
 	where
 		toF' (Line (x, y) (Vector (dx, dy))) (argX, argY) = (argX - x) * dy - (argY - y) * dx
 
--- 2線の交点を求めます。ただし、与えられた線は無限に伸ばした直線として交点を返します。
+-- 2線の交点を返します。ただし、与えられた線は無限に伸ばした直線として交点を求めます。
 -- 2線が平行の場合、Nothingとなります。
 imaginaryCross :: (Fractional d, Eq d) => Line d -> Line d -> Maybe (Point d)
 imaginaryCross (Line (x1, y1) v1@(Vector (dx1, dy1))) (Line (x2, y2) v2@(Vector (dx2, dy2)))
@@ -114,27 +114,31 @@ takePoint (Line p _) = p
 chop :: (Fractional d, Ord d, Eq d) => Line d -> Line d -> Point d -> (Maybe (Line d), Bool)
 chop target breakLine side
 	| isPara target breakLine = nearside
-	| otherwise               = chopAt' $ cross target breakLine
+	| otherwise               = chopAt $ cross target breakLine
 	where
 		isHereSide = isSameSide breakLine side
 		targetIsSameSide = isHereSide $ takePoint target
 		nearside
 			| targetIsSameSide = (Just target, False)
 			| otherwise        = (Nothing, False)
-		chopAt' Nothing
+		chopAt Nothing
 			| targetIsSameSide = (Just target, False)
 			| otherwise        = (Nothing, False)
-		chopAt' (Just crossPoint) = newLine target
+		chopAt (Just crossPoint) = newLine target
 			where
 				newLine (Line _ v)
 					| isHereSide (crossPoint -|> v) = (Just $ SLine crossPoint v, True)
 					| otherwise                     = (Just $ SLine crossPoint $ reverseVector v, True)
 				newLine (SLine p v)
+					| p == crossPoint               = if isHereSide (crossPoint -|> v)
+														then (Just $ SLine p v, False)
+														else (Nothing, True)
 					| isHereSide p                  = (Just $ CLine p crossPoint, True)
 					| isHereSide (crossPoint -|> v) = (Just $ SLine crossPoint v, True)
 					| otherwise                     = (Just $ CLine p crossPoint, True)
 --					| otherwise    = SLine crossPoint v
 				newLine (CLine p1 p2)
+					| isHereSide p1 && isHereSide p2 = (Just $ CLine p1 p2, True)
 					| isHereSide p1 = (Just $ CLine p1 crossPoint, True)
 					| isHereSide p2 = (Just $ CLine p2 crossPoint, True)
 					| otherwise     = (Nothing, True)

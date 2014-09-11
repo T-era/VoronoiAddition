@@ -17,7 +17,7 @@ newtype Vector d = Vector (d, d) deriving (Show)
 instance (Eq d) => Eq (Vector d) where
 	(==) (Vector (dx1, dy1)) (Vector (dx2, dy2))= dx1 == dx2 && dy1 == dy2
 instance (Num d, Eq d) => Directive (Vector d) where
-	isPara (Vector (dx1, dy1)) (Vector (dx2, dy2)) = (dx1 * dy2 == dx2 * dy1)
+	isPara (Vector (dx1, dy1)) (Vector (dx2, dy2)) = (dx1 * dy2 == dx2 * dy1) -- TODO 0.00001とかと差分比較？
 	isSameDirection v1@(Vector (dx1, dy1)) v2@(Vector (dx2, dy2))
 		= isPara v1 v2 && signum dx1 == signum dx2 && signum dy1 == signum dy2
 
